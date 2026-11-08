@@ -110,6 +110,15 @@ p { margin: 0; }
 .basket-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 .basket-btn b { font-family: var(--f-mono); font-weight: 500; }
 .menu-btn { display: none; background: none; border: 1px solid rgba(233, 236, 239, 0.25); border-radius: 999px; height: 36px; padding: 0 14px; font-size: 13px; font-weight: 600; }
+@media (max-width: 1420px) {
+  html:not([lang='en']) .nav { display: none; }
+  html:not([lang='en']) .hdr-r { margin-left: auto; }
+  html:not([lang='en']) .menu-btn { display: block; }
+  html:not([lang='en']) .hdr.open .nav { display: flex; flex-direction: column; align-items: stretch; gap: 0; position: absolute; top: 100%; left: 0; right: 0; margin: 0; background: var(--stage); padding: 8px var(--gutter-r) 20px var(--gutter); border-top: 1px solid var(--stage-line); max-height: calc(100vh - 68px); overflow-y: auto; }
+  html:not([lang='en']) .hdr.open .nav a, html:not([lang='en']) .hdr.open .nav button.dd-btn { padding: 12px 0; font-size: 17px; }
+  html:not([lang='en']) .hdr.open .dd-menu { display: flex; position: static; background: none; border: 0; box-shadow: none; padding: 0 0 6px 14px; }
+  html:not([lang='en']) .hdr.open .dd-btn { display: none; }
+}
 @media (max-width: 1100px) {
   .nav { display: none; }
   .hdr-r { margin-left: auto; }
