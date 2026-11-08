@@ -224,3 +224,5 @@ html[lang='hy'] .phero h1 { font-size: clamp(28px, 4.4vw, 56px); max-width: 22ch
 .qty output { min-width: 28px; text-align: center; font-family: var(--f-mono); }
 .price-act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .sample-line { font-size: 12.5px; color: var(--stage-mut); }
+
+[hidden] { display: none !important; }
