@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import PathHero from '../../components/PathHero.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+import { SYSTEMS } from '../../data/systems';
+import { sectionSvg } from '../../lib/sectionSvg';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang]; const p = t.paths.arch;
+const specs = SYSTEMS.map((s) => ({ id: s.id, name: s.name, text: p.specBody.replace('{system}', s.name) }));
+const svgs = Object.fromEntries(SYSTEMS.map((s) => [s.id, sectionSvg(s, { dark: false })]));
+---
+<Base lang={lang} page="architects">
+  <PathHero eye={p.eye} title={p.title} lead={p.lead} img={asset('img/site/architectural.jpg')} alt={p.title}>
+    <a class="btn btn-light" href="#downloads">{p.dlTitle}</a>
+    <a class="btn btn-line" href={href(lang, 'quote')}>{p.cta}</a>
+  </PathHero>
+  <section class="band" id="downloads">
+    <div class="wrap">
+      <div class="head"><div><h2>{p.dlTitle}</h2><p class="lede">{p.dlLead}</p></div><span class="sample-tag">{t.common.sample}</span></div>
+      <div class="dl-table">
+        {SYSTEMS.map((s) => (
+          <div class="dl-row reveal">
+            <div class="dl-fig" set:html={sectionSvg(s)} />
+            <div class="dl-name"><b>{s.name}</b><span class="mono">{t.sys.families[s.family]} · {s.depth} {t.common.mm}</span></div>
+            <div class="dl-acts">
+              <a class="btn btn-ink sm" href={asset(`downloads/eurog-${s.id}-${lang}.pdf`)} download>{p.sheet} · {p.pdf}</a>
+              <button type="button" class="btn btn-line sm" data-svg={s.id}>{p.svg} · SVG</button>
+              <button type="button" class="btn btn-line sm" data-spec={s.id}>{p.spec}</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div class="card" id="specBox" hidden style="margin-top:24px">
+        <h3>{p.specTitle}</h3><p id="specText" style="margin:10px 0 16px;color:var(--ink)"></p><button type="button" class="btn btn-ink sm" id="specCopy">{p.copy}</button>
+      </div>
+    </div>
+  </section>
+  <section class="band white">
+    <div class="wrap grid g2" style="align-items:start">
+      <div><h2>{p.supportTitle}</h2></div>
+      <ul class="sup">{p.support.map((s) => <li>{s}</li>)}</ul>
+    </div>
+  </section>
+  <script define:vars={{ specs, svgs, copied: p.copied, copy: p.copy }}>
+    const box = document.getElementById('specBox'), txt = document.getElementById('specText'), btn = document.getElementById('specCopy');
+    document.querySelectorAll('[data-spec]').forEach((b) => b.addEventListener('click', () => { const s = specs.find((x) => x.id === b.dataset.spec); txt.textContent = s.text; box.hidden = false; box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }));
+    btn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(txt.textContent); } catch (e) { const r = document.createRange(); r.selectNode(txt); getSelection().removeAllRanges(); getSelection().addRange(r); } btn.textContent = copied; setTimeout(() => (btn.textContent = copy), 1800); });
+    document.querySelectorAll('[data-svg]').forEach((b) => b.addEventListener('click', () => {
+      const blob = new Blob([svgs[b.dataset.svg]], { type: 'image/svg+xml' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'eurog-' + b.dataset.svg + '-section.svg'; document.body.appendChild(a); a.click(); a.remove();
+    }));
+  </script>
+  <style is:global>
+    .dl-table { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--card); overflow: hidden; }
+    .dl-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 16px 20px; border-top: 1px solid var(--line); } .dl-row:first-child { border-top: 0; }
+    @media (max-width: 860px) { .dl-row { grid-template-columns: 72px minmax(0, 1fr); } .dl-acts { grid-column: 1 / -1; } }
+    .dl-fig svg { width: 96px; height: auto; display: block; background: var(--paper); border-radius: 6px; } @media (max-width: 860px) { .dl-fig svg { width: 72px; } }
+    .dl-name b { font-family: var(--f-display); font-size: 20px; display: block; } .dl-name .mono { font-size: 12px; color: var(--mut); letter-spacing: .06em; }
+    .dl-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sup { margin: 0; padding: 0; list-style: none; display: grid; } .sup li { border-top: 1px solid var(--line); padding: 16px 0; font-size: 17px; font-weight: 500; }
+  </style>
+</Base>

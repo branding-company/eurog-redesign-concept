@@ -1,0 +1,75 @@
+---
+import { dicts, href, type Lang } from '../lib/i18n';
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = dicts[lang];
+const o = t.opening;
+const data = { a: o.a, b: o.b, scroll: o.scroll };
+---
+<section class="open" id="opening" data-variant="a" aria-label="EURO.G Systems">
+  <div class="open-scroll" id="openScroll">
+    <div class="open-stick">
+      <svg id="openSvg" class="open-svg" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" role="img" aria-label={o.a.chapters[4].t}></svg>
+      <div class="open-vignette"></div>
+      <div class="open-copy" id="openCopy">
+        <p class="open-kick" id="oKick">{o.a.kicker}</p>
+        <h1 class="open-h1" id="oH1">{o.a.h1}</h1>
+        <p class="open-lead" id="oLead">{o.a.lead}</p>
+        <p class="open-cue"><span id="oCue">{o.scroll}</span><i></i></p>
+      </div>
+      <div class="open-chap" id="openChap" aria-live="polite">
+        <span class="open-ck mono" id="oCk"></span>
+        <p id="oCt"></p>
+      </div>
+      <div class="open-fin" id="openFin">
+        <h2 id="oFinT">{o.a.finaleTitle}</h2>
+        <div class="open-fin-cta">
+          <a class="btn btn-light" id="oFin1" href={href(lang, 'configurator')}>{o.a.finaleCta1}</a>
+          <a class="btn btn-line" id="oFin2" href={href(lang, 'quote')}>{o.a.finaleCta2}</a>
+        </div>
+      </div>
+      <ol class="open-rail" id="openRail" aria-hidden="true"></ol>
+      <div class="open-var" role="group" aria-label={o.variantLabel}>
+        <span class="mono">{o.variantLabel}</span>
+        <button type="button" data-var="a" aria-pressed="true">{o.variantA}</button>
+        <button type="button" data-var="b" aria-pressed="false">{o.variantB}</button>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" id="open-i18n" set:html={JSON.stringify({ ...data, hrefs: { cfg: href(lang, 'configurator'), sav: href(lang, 'savings'), quote: href(lang, 'quote') } })} />
+</section>
+<script>import '../scripts/opening';</script>
+<style is:global>
+  .open { background: var(--stage); color: var(--stage-ink); color-scheme: dark; position: relative; }
+  .open-scroll { height: 520vh; position: relative; }
+  .open-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+  .open-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .open-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 65% 45%, transparent 40%, rgba(10, 11, 15, 0.7) 100%), linear-gradient(0deg, rgba(10, 11, 15, 0.7), transparent 38%); }
+  .open-copy { position: absolute; left: var(--gutter); right: var(--gutter-r); bottom: clamp(88px, 14vh, 150px); max-width: 1180px; margin: 0 auto; will-change: opacity, transform; }
+  .open-kick { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-2); margin: 0 0 18px; }
+  .open-h1 { max-width: 11em; text-shadow: 0 2px 30px rgba(0,0,0,.45); }
+  html[lang='hy'] .open-h1 { max-width: 13em; }
+  .open-lead { max-width: 46ch; margin-top: 22px; color: rgba(233,236,239,.82); font-size: clamp(16px, 1.5vw, 20px); }
+  .open-cue { margin-top: 30px; display: flex; align-items: center; gap: 14px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--stage-mut); }
+  .open-cue i { width: 1px; height: 38px; background: linear-gradient(var(--accent-2), transparent); animation: cue 1.8s ease-in-out infinite; transform-origin: top; }
+  @keyframes cue { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+  .open-chap { position: absolute; left: var(--gutter); bottom: clamp(70px, 12vh, 120px); max-width: min(380px, 34vw); opacity: 0; transition: opacity .35s; pointer-events: none; }
+  .open-ck { display: block; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 10px; }
+  .open-chap p { font-family: var(--f-display); font-weight: 600; font-size: clamp(20px, 2.4vw, 30px); line-height: 1.2; text-shadow: 0 2px 24px rgba(0,0,0,.6); }
+  html[lang='hy'] .open-chap p { font-size: clamp(18px, 2vw, 25px); line-height: 1.35; }
+  .open-fin { position: absolute; left: var(--gutter); right: var(--gutter-r); bottom: clamp(70px, 11vh, 120px); opacity: 0; pointer-events: none; max-width: 1180px; margin: 0 auto; }
+  .open-fin h2 { max-width: 14em; text-shadow: 0 2px 30px rgba(0,0,0,.5); }
+  .open-fin-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .open-fin.on { pointer-events: auto; }
+  .open-rail { position: absolute; right: max(14px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%); list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .open-rail li { width: 3px; height: 26px; background: var(--stage-line); border-radius: 2px; overflow: hidden; position: relative; }
+  .open-rail li i { position: absolute; inset: 0; background: var(--accent-2); transform: scaleY(0); transform-origin: top; }
+  .open-var { position: absolute; right: var(--gutter-r); bottom: max(16px, env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--stage-mut); }
+  .open-var .mono { margin-right: 4px; text-transform: uppercase; letter-spacing: .1em; display: none; }
+  .open-var button { background: rgba(20,22,27,.6); border: 1px solid var(--stage-line); border-radius: 999px; font: 500 11px var(--f-mono); letter-spacing: .06em; padding: 6px 12px; color: var(--stage-mut); backdrop-filter: blur(6px); }
+  .open-var button[aria-pressed='true'] { background: var(--stage-ink); color: var(--stage); border-color: var(--stage-ink); }
+  @media (min-width: 700px) { .open-var .mono { display: inline; } }
+  @media (max-width: 960px) { .open-chap { max-width: calc(100% - 32px); } }
+  @media (max-width: 700px) { .open-rail { display: none; } .open-copy { bottom: 90px; } .open-chap { bottom: 74px; } }
+  @media (prefers-reduced-motion: reduce) { .open-cue i { animation: none; } }
+</style>

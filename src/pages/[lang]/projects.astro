@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+import { PROJECTS, outlinePath, project, MAP_W, MAP_H, type PType } from '../../data/projects';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const p = t.prj;
+const types = Object.keys(p.types) as PType[];
+const data = PROJECTS.map((x) => ({ id: x.id, type: x.type, city: x.city[lang], name: x.name[lang], year: x.year, systems: x.systems, img: asset(x.img), area: x.area }));
+---
+<Base lang={lang} page="projects">
+  <section class="phero">
+    <div class="wrap"><p class="eye">{p.eye}</p><h1>{p.title}</h1><p class="lede">{p.lead}</p></div>
+  </section>
+  <section class="band tight">
+    <div class="wrap">
+      <div class="head" style="margin-bottom:24px">
+        <div class="chips" id="prjFilter" role="group" aria-label={p.filter}>
+          <button type="button" class="pill" data-t="all" aria-pressed="true">{p.all}</button>
+          {types.map((k) => <button type="button" class="pill" data-t={k} aria-pressed="false">{p.types[k]}</button>)}
+        </div>
+        <span class="sample-tag">{p.sample}</span>
+      </div>
+      <div class="prj">
+        <div class="prj-map card dark">
+          <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} id="prjMap" role="img" aria-label={p.mapNote}>
+            <defs><pattern id="mg" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#242831" stroke-width="1" /></pattern></defs>
+            <rect width={MAP_W} height={MAP_H} fill="url(#mg)" />
+            <path d={outlinePath()} fill="#1d2430" stroke="#4a5568" stroke-width="1.5" stroke-linejoin="round" />
+            {PROJECTS.map((x) => { const [cx, cy] = project(x.lon, x.lat); return (
+              <g class="pin" data-id={x.id} data-t={x.type} transform={`translate(${cx.toFixed(1)} ${cy.toFixed(1)})`} tabindex="0" role="button" aria-label={`${x.name[lang]}, ${x.city[lang]}`}>
+                <circle class="pin-hit" r="16" fill="transparent" /><circle class="pin-ring" r="9" /><circle class="pin-dot" r="5" />
+              </g>); })}
+          </svg>
+          <p class="mono" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--stage-mut);margin-top:8px"><span id="prjCount"></span> {p.count} · {p.mapNote}</p>
+        </div>
+        <aside class="prj-detail card" id="prjDetail" aria-live="polite"></aside>
+      </div>
+      <div class="grid g3" id="prjList" style="margin-top:36px">
+        {PROJECTS.map((x) => (
+          <article class="prj-card" data-id={x.id} data-t={x.type} tabindex="0">
+            <div class="photo" style="aspect-ratio:4/3"><img src={asset(x.img)} alt={`${x.name[lang]}, ${x.city[lang]}`} loading="lazy" width="600" height="450" /></div>
+            <div class="prj-meta"><span class="mono">{p.types[x.type]}</span><span class="mono">{x.year}</span></div>
+            <h3>{x.name[lang]}</h3><p style="color:var(--mut)">{x.city[lang]} · {x.systems.join(', ')}</p>
+          </article>
+        ))}
+      </div>
+      <p class="prj-none" id="prjNone" hidden>{p.noMatch}</p>
+    </div>
+  </section>
+  <script type="application/json" id="i18n" set:html={JSON.stringify({ p, data, quote: href(lang, 'quote'), common: t.common })} />
+  <script>import '../../scripts/projects';</script>
+</Base>
+<style is:global>
+  .prj { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .prj { grid-template-columns: minmax(0, 1fr); } }
+  .prj-map { padding: 16px; }
+  .prj-map svg { width: 100%; height: auto; display: block; max-height: 620px; }
+  .pin { cursor: pointer; outline: none; }
+  .pin-ring { fill: rgba(111, 201, 218, .18); stroke: #6fc9da; stroke-width: 1.2; transition: transform .2s; transform-box: fill-box; transform-origin: center; }
+  .pin-dot { fill: #6fc9da; }
+  .pin:hover .pin-ring, .pin:focus-visible .pin-ring { transform: scale(1.35); }
+  .pin.on .pin-dot { fill: #f0a15c; } .pin.on .pin-ring { stroke: #f0a15c; fill: rgba(240, 161, 92, .25); transform: scale(1.5); }
+  .pin.off { opacity: .12; pointer-events: none; }
+  .prj-detail { position: sticky; top: 84px; padding: 0; overflow: hidden; }
+  .prj-detail .photo { border-radius: 0; aspect-ratio: 16 / 10; }
+  .prj-detail .body { padding: 20px 22px 24px; display: grid; gap: 12px; }
+  .prj-detail dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; margin: 4px 0 6px; }
+  .prj-detail dl div { border-top: 1px solid var(--line); padding: 8px 0; }
+  .prj-detail dt { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
+  .prj-detail dd { margin: 2px 0 0; font-weight: 600; }
+  .prj-card { cursor: pointer; border-radius: 10px; }
+  .prj-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .prj-card .photo img { transition: transform .6s; }
+  .prj-card:hover .photo img { transform: scale(1.04); }
+  .prj-card.on .photo { outline: 3px solid var(--accent); }
+  .prj-meta { display: flex; justify-content: space-between; margin: 12px 0 6px; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  .prj-none { margin-top: 24px; color: var(--mut); }
+</style>

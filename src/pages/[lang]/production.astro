@@ -1,0 +1,91 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const p = t.prod;
+const imgs = [1, 2, 3, 4, 5, 6].map((n) => asset(`img/site/prod-${n}.jpg`));
+---
+<Base lang={lang} page="production">
+  <section class="phero">
+    <div class="wrap"><p class="eye">{p.eye}</p><h1>{p.title}</h1><p class="lede">{p.lead}</p></div>
+  </section>
+  <section class="pstory dark" id="story" aria-label={p.title}>
+    <div class="pstory-scroll" id="storyScroll">
+      <div class="pstory-stick">
+        <div class="pstory-grid wrap">
+          <div class="pstory-text">
+            <div class="pstory-count mono"><span id="psN">01</span> <i>{p.of}</i> 06</div>
+            <div id="psTexts">
+              {p.stages.map((s, i) => (
+                <div class="ps-t" data-i={i} aria-hidden={i === 0 ? 'false' : 'true'}>
+                  <h2>{s.t}</h2><p>{s.p}</p><span class="ps-m mono">{s.m}</span>
+                </div>
+              ))}
+            </div>
+            <ol class="ps-steps" id="psSteps">{p.stages.map((s, i) => <li data-i={i}><i></i><span>{s.t}</span></li>)}</ol>
+          </div>
+          <div class="pstory-img" id="psImgs">
+            {imgs.map((src, i) => <img src={src} alt={p.stages[i].t} data-i={i} width="800" height="600" loading={i < 2 ? 'eager' : 'lazy'} />)}
+            <div class="ps-scan" id="psScan"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="band white">
+    <div class="wrap qc">
+      <div><p class="eye">{p.stages[4].t}</p><h2>{p.qcTitle}</h2><p class="sample-tag" style="margin-top:18px;display:inline-block">{p.qcNote}</p></div>
+      <ul class="qc-list">{p.qc.map((q, i) => <li class="reveal" style={`transition-delay:${i * 70}ms`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" /></svg>{q}</li>)}</ul>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap pf">
+      <div class="photo" style="aspect-ratio:4/3"><img src={asset('img/site/facility.jpg')} alt="EURO.G Systems production building" width="1200" height="900" loading="lazy" /></div>
+      <div class="pf-facts">
+        {p.facts.map((f) => <div class="reveal"><b>{f.n}</b><span>{f.l}</span></div>)}
+        <a class="btn btn-ink" href={href(lang, 'quote')}>{t.home.quoteCta}</a>
+      </div>
+    </div>
+  </section>
+  <script>import '../../scripts/production';</script>
+</Base>
+<style is:global>
+  .pstory { background: var(--stage); color: var(--stage-ink); }
+  .pstory-scroll { height: 640vh; position: relative; }
+  .pstory-stick { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; padding-top: 68px; overflow: hidden; }
+  .pstory-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 72px); align-items: center; }
+  @media (max-width: 860px) { .pstory-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; align-content: start; } .pstory-stick { align-items: flex-start; padding-top: 76px; } }
+  .pstory-count { font-size: 13px; letter-spacing: .14em; color: var(--accent-2); margin-bottom: 18px; }
+  .pstory-count i { font-style: normal; opacity: .7; }
+  .pstory-count span { font-family: var(--f-display); font-size: clamp(48px, 7vw, 96px); letter-spacing: -.02em; color: var(--stage-ink); line-height: 1; display: inline-block; min-width: 1.6ch; }
+  #psTexts { position: relative; min-height: 220px; }
+  .ps-t { position: absolute; inset: 0 0 auto 0; opacity: 0; transform: translateY(18px); transition: opacity .5s, transform .5s; pointer-events: none; }
+  .ps-t.on { opacity: 1; transform: none; pointer-events: auto; position: relative; }
+  .ps-t h2 { font-size: clamp(26px, 3.4vw, 46px); }
+  .ps-t p { color: var(--stage-mut); margin-top: 14px; max-width: 46ch; font-size: clamp(15px, 1.3vw, 18px); }
+  .ps-m { display: inline-block; margin-top: 16px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--stage-line); padding: 4px 12px; border-radius: 999px; color: var(--accent-2); }
+  .ps-steps { list-style: none; padding: 0; margin: 28px 0 0; display: flex; gap: 6px; }
+  .ps-steps li { flex: 1 1 0; min-width: 0; }
+  .ps-steps i { display: block; height: 3px; background: var(--stage-line); border-radius: 2px; overflow: hidden; position: relative; }
+  .ps-steps i::after { content: ''; position: absolute; inset: 0; background: var(--accent-2); transform: scaleX(var(--f, 0)); transform-origin: left; }
+  .ps-steps span { display: none; }
+  @media (min-width: 1000px) { .ps-steps span { display: block; font-size: 11px; color: var(--stage-mut); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+  .pstory-img { position: relative; aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; background: #0c0e12; max-height: 62vh; width: 100%; }
+  @media (max-width: 860px) { .pstory-img { max-height: 36vh; } #psTexts { min-height: 180px; } }
+  .pstory-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.08); transition: opacity .7s, transform 1.6s cubic-bezier(.2,.7,.2,1); }
+  .pstory-img img.on { opacity: 1; transform: scale(1); }
+  .ps-scan { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-2), transparent); box-shadow: 0 0 24px 4px rgba(111, 201, 218, .35); top: 0; opacity: .8; pointer-events: none; }
+  .qc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: clamp(24px, 5vw, 80px); align-items: start; }
+  @media (max-width: 860px) { .qc { grid-template-columns: minmax(0, 1fr); } }
+  .qc-list { list-style: none; margin: 0; padding: 0; display: grid; }
+  .qc-list li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid var(--line); font-size: 17px; font-weight: 500; }
+  .qc-list svg { width: 28px; height: 28px; fill: none; stroke: var(--ok); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .pf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: center; }
+  @media (max-width: 860px) { .pf { grid-template-columns: minmax(0, 1fr); } }
+  .pf-facts { display: grid; gap: 0; }
+  .pf-facts div { border-top: 1px solid var(--line); padding: 16px 0; display: flex; gap: 20px; align-items: baseline; }
+  .pf-facts b { font-family: var(--f-display); font-size: clamp(34px, 4.4vw, 56px); line-height: 1; min-width: 4.2ch; }
+  .pf-facts a { margin-top: 20px; justify-self: start; }
+</style>

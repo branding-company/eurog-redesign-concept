@@ -1,0 +1,66 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const q = t.qt;
+const json = { qt: q, common: t.common, cfgTxt: t.cfg, lang, cfg: href(lang, 'configurator'), sav: href(lang, 'savings'), nav: t.nav };
+---
+<Base lang={lang} page="quote">
+  <section class="phero">
+    <div class="wrap"><p class="eye">{q.eye}</p><h1>{q.title}</h1><p class="lede">{q.lead}</p></div>
+  </section>
+  <section class="band tight">
+    <div class="wrap qt">
+      <div class="qt-main">
+        <ol class="qt-steps" id="qtSteps" aria-label={q.title}></ol>
+        <form class="card qt-card" id="qtForm" novalidate onsubmit="return false"><div id="qtBody"></div>
+          <div class="qt-nav"><button type="button" class="btn btn-line" id="qtBack">{t.common.back}</button><button type="button" class="btn btn-ink" id="qtNext">{t.common.next}</button></div>
+        </form>
+        <div class="card qt-done" id="qtDone" hidden></div>
+      </div>
+      <aside class="card qt-sum" id="qtSum" aria-live="polite"></aside>
+    </div>
+  </section>
+  <script type="application/json" id="i18n" set:html={JSON.stringify(json)} />
+  <script>import '../../scripts/quote';</script>
+</Base>
+<style is:global>
+  .qt { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .qt { grid-template-columns: minmax(0, 1fr); } }
+  .qt-steps { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 0 0 18px; padding: 0; counter-reset: s; }
+  .qt-steps li { border-top: 3px solid var(--line); padding-top: 8px; font-size: 12.5px; font-weight: 600; color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qt-steps li.on { border-color: var(--accent); color: var(--ink); } .qt-steps li.done { border-color: var(--ink); color: var(--ink); }
+  .qt-card { display: grid; gap: 24px; padding: clamp(18px, 3vw, 32px); }
+  .qt-card h2 { font-size: clamp(22px, 2.4vw, 30px); }
+  .qt-body, #qtBody { display: grid; gap: 20px; }
+  .qt-nav { display: flex; justify-content: space-between; gap: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; }
+  .opt { text-align: left; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font-weight: 600; min-height: 56px; }
+  .opt[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: #f0f9fb; }
+  .drop { border: 1.5px dashed var(--grey); border-radius: 12px; padding: 28px; text-align: center; display: grid; gap: 10px; justify-items: center; background: var(--paper); }
+  .drop.over { border-color: var(--accent); background: #e9f6f9; }
+  .files { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .file { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-size: 12px; background: #fff; }
+  .file img, .file .ph { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: grid; place-items: center; background: var(--paper-2); font-family: var(--f-mono); }
+  .file div { padding: 6px 8px; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+  .file span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file button { background: none; border: 0; color: var(--bad); font-size: 16px; padding: 0; }
+  .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
+  .day { flex: 0 0 auto; width: 64px; border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 8px 0; text-align: center; line-height: 1.2; }
+  .day small { display: block; font-size: 11px; color: var(--mut); text-transform: uppercase; } .day b { font-family: var(--f-display); font-size: 22px; display: block; }
+  .day[aria-pressed='true'] { background: var(--ink); color: #fff; border-color: var(--ink); } .day[aria-pressed='true'] small { color: #c5cad3; }
+  .slots { display: flex; flex-wrap: wrap; gap: 8px; }
+  .slot { border: 1px solid var(--line); border-radius: 999px; background: #fff; padding: 8px 16px; font-family: var(--f-mono); font-size: 13px; }
+  .slot[aria-pressed='true'] { background: var(--ink); color: #fff; border-color: var(--ink); } .slot:disabled { text-decoration: line-through; opacity: .4; cursor: not-allowed; }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 14px; }
+  .qt-sum { position: sticky; top: 84px; display: grid; gap: 0; }
+  .qt-sum h3 { margin-bottom: 8px; }
+  .qt-sum div.r { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .qt-sum div.r span:first-child { color: var(--mut); }
+  .qt-sum div.r span:last-child { text-align: right; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .qt-done h2 { margin: 10px 0; } .qt-done dl { margin: 18px 0; }
+  .qt-done .ok-ic { width: 52px; height: 52px; border-radius: 50%; background: #dff1e7; display: grid; place-items: center; color: var(--ok); }
+  .qt-done .ok-ic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+</style>

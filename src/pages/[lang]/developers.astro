@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import PathHero from '../../components/PathHero.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang]; const p = t.paths.dev;
+---
+<Base lang={lang} page="developers">
+  <PathHero eye={p.eye} title={p.title} lead={p.lead} img={asset('img/site/pro-2.jpg')} alt={p.title}>
+    <a class="btn btn-light" href={href(lang, 'quote')}>{p.cta}</a>
+    <a class="btn btn-line" href={href(lang, 'projects')}>{t.nav.projects}</a>
+  </PathHero>
+  <section class="band">
+    <div class="wrap"><div class="grid g4">{p.points.map((s, i) => <div class="card reveal" style={`transition-delay:${i * 80}ms`}><h3>{s.t}</h3><p>{s.p}</p></div>)}</div></div>
+  </section>
+  <section class="band dark">
+    <div class="wrap">
+      <div class="head"><div><h2>{p.processTitle}</h2></div></div>
+      <ol class="proc">{p.process.map((s, i) => <li class="reveal" style={`transition-delay:${i * 90}ms`}><span class="mono">{String(i + 1).padStart(2, '0')}</span><b>{s}</b></li>)}</ol>
+    </div>
+  </section>
+  <section class="band tight">
+    <div class="wrap grid g2" style="align-items:center">
+      <div class="photo" style="aspect-ratio:16/10"><img src={asset('img/site/prod-6.jpg')} alt="" loading="lazy" width="800" height="600" /></div>
+      <div><h2>{t.paths.dev.cta}</h2><p class="lede">{t.home.quoteLead}</p><a class="btn btn-ink" style="margin-top:24px" href={href(lang, 'quote')}>{t.home.quoteCta}</a></div>
+    </div>
+  </section>
+  <style is:global>
+    .proc { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0; counter-reset: p; }
+    .proc li { border-top: 2px solid var(--stage-line); padding: 18px 18px 0 0; display: grid; gap: 10px; align-content: start; position: relative; }
+    .proc li::before { content: ''; position: absolute; top: -2px; left: 0; width: 36px; height: 2px; background: var(--accent-2); }
+    .proc .mono { color: var(--accent-2); font-size: 12px; letter-spacing: .12em; } .proc b { font-family: var(--f-display); font-size: 19px; line-height: 1.25; }
+  </style>
+</Base>

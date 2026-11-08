@@ -1,0 +1,62 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const c = t.cfg;
+const json = { cfg: c, common: t.common, sys: t.sys, lang, quote: href(lang, 'quote') };
+---
+<Base lang={lang} page="configurator">
+  <section class="phero">
+    <div class="wrap">
+      <p class="eye">{c.eye}</p>
+      <h1>{c.title}</h1>
+      <p class="lede">{c.lead}</p>
+    </div>
+  </section>
+  <section class="band tight cfg-band">
+    <div class="wrap cfg">
+      <div class="cfg-stage dark">
+        <div class="cfg-bar">
+          <span class="mono cfg-cap" id="cfgCap"></span>
+          <div class="seg" role="group" aria-label={c.view}>
+            <button type="button" data-view="inside" aria-pressed="true">{c.inside}</button>
+            <button type="button" data-view="outside" aria-pressed="false">{c.outside}</button>
+          </div>
+        </div>
+        <svg id="cfgSvg" viewBox="0 0 600 560" role="img" aria-label={c.summary}></svg>
+        <p class="cfg-warn" id="cfgWarn" role="status"></p>
+      </div>
+      <div class="cfg-panel" id="cfgPanel"></div>
+    </div>
+  </section>
+  <script type="application/json" id="i18n" set:html={JSON.stringify(json)} />
+  <script>import '../../scripts/configurator';</script>
+</Base>
+<style is:global>
+  .cfg { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .cfg { grid-template-columns: minmax(0, 1fr); } }
+  .cfg-stage { background: var(--stage); border-radius: 14px; padding: 16px 16px 20px; position: sticky; top: 84px; color: var(--stage-ink); }
+  @media (max-width: 960px) { .cfg-stage { position: static; } }
+  .cfg-bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .cfg-cap { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--stage-mut); }
+  .cfg-stage svg { width: 100%; height: auto; display: block; }
+  .cfg-warn { min-height: 22px; font-size: 13.5px; color: var(--warm); margin-top: 6px; }
+  .cfg-panel { display: grid; gap: 22px; min-width: 0; }
+  .cfg-group { display: grid; gap: 10px; }
+  .cfg-group > .lb { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mut); }
+  .sz { display: grid; grid-template-columns: 90px minmax(0, 1fr) 96px; gap: 12px; align-items: center; }
+  .sz .input { min-height: 42px; text-align: right; font-family: var(--f-mono); }
+  .sys-list { display: grid; gap: 8px; }
+  .sys-opt { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .sys-opt[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .sys-opt:disabled { opacity: .4; cursor: not-allowed; }
+  .sys-opt b { font-family: var(--f-display); }
+  .sys-opt small { color: var(--mut); font-size: 12.5px; }
+  .sys-opt .mono { font-size: 12px; color: var(--mut); align-self: center; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sw { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 6px; background: var(--card); font-size: 13.5px; font-weight: 600; }
+  .sw i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,.25); display: block; }
+  .sw[aria-pressed='true'] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+</style>

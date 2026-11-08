@@ -1,0 +1,16 @@
+---
+interface Props { eye: string; title: string; lead: string; img: string; alt: string }
+const { eye, title, lead, img, alt } = Astro.props;
+---
+<section class="phero path-hero">
+  <div class="wrap path-hero-in">
+    <div style="min-width:0"><p class="eye">{eye}</p><h1>{title}</h1><p class="lede">{lead}</p><div class="path-cta"><slot /></div></div>
+    <div class="photo path-ph"><img src={img} alt={alt} width="900" height="700" /></div>
+  </div>
+</section>
+<style is:global>
+  .path-hero-in { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; }
+  @media (max-width: 860px) { .path-hero-in { grid-template-columns: minmax(0, 1fr); } }
+  .path-ph { aspect-ratio: 4 / 3; border: 1px solid var(--stage-line); }
+  .path-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+</style>

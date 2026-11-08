@@ -1,0 +1,21 @@
+{
+  "name": "eurog-redesign-concept",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "EURO.G Systems: redesign concept",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sheets": "node scripts/make-sheets.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/noto-sans-armenian": "^5.3.0",
+    "astro": "^7.4.7"
+  }
+}

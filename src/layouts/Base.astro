@@ -1,0 +1,123 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-500.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+import '@fontsource/ibm-plex-sans/cyrillic-400.css';
+import '@fontsource/ibm-plex-sans/cyrillic-500.css';
+import '@fontsource/ibm-plex-sans/cyrillic-600.css';
+import '@fontsource/ibm-plex-sans/cyrillic-700.css';
+import '@fontsource/ibm-plex-sans/latin-700.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
+import '@fontsource/noto-sans-armenian/armenian-400.css';
+import '@fontsource/noto-sans-armenian/armenian-500.css';
+import '@fontsource/noto-sans-armenian/armenian-600.css';
+import '@fontsource/noto-sans-armenian/armenian-700.css';
+import '@fontsource/noto-sans-armenian/armenian-800.css';
+import '../styles/global.css';
+import { LANGS, LANG_LABEL, dicts, href, absolute, asset, seoKey, SITE, type Lang, type PageKey } from '../lib/i18n';
+
+interface Props { lang: Lang; page: PageKey; solidHeader?: boolean; ogImage?: string }
+const { lang, page, solidHeader = true, ogImage = 'img/site/hero-poster.jpg' } = Astro.props;
+const t = dicts[lang];
+const seo = t.seo[seoKey(page)];
+const canonical = absolute(lang, page);
+const og = SITE + asset(ogImage);
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'Organization', name: 'EURO.G Systems', url: SITE + href(lang), logo: SITE + asset('img/logo-dark.png'), email: 'eurogsystems@gmail.com', telephone: '+37444770030', address: { '@type': 'PostalAddress', addressLocality: 'Yerevan', addressCountry: 'AM' }, description: t.footer.tag },
+    { '@type': 'WebSite', name: 'EURO.G Systems (redesign concept)', url: SITE + href(lang), inLanguage: t.meta.htmlLang },
+  ],
+};
+const nav = [
+  ['systems', 'systems'], ['configurator', 'configurator'], ['savings', 'savings'], ['projects', 'projects'], ['production', 'production'],
+] as const;
+const paths = [['homeowners', 'homeowners'], ['architects', 'architects'], ['developers', 'developers'], ['dealers', 'dealers']] as const;
+const siteI18n = { empty: t.cfg.basketEmpty, amd: t.common.amd, remove: t.cfg.remove };
+---
+<!doctype html>
+<html lang={t.meta.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{seo.t} · {t.meta.concept}</title>
+    <meta name="description" content={seo.d} />
+    <link rel="canonical" href={canonical} />
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={absolute(l, page)} />)}
+    <link rel="alternate" hreflang="x-default" href={absolute('hy', page)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EURO.G Systems" />
+    <meta property="og:title" content={seo.t} />
+    <meta property="og:description" content={seo.d} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:locale" content={t.meta.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#14161b" />
+    <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    <script type="application/ld+json" set:html={JSON.stringify(orgLd)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.nav.skip}</a>
+    <header class="hdr" id="hdr" data-solid={solidHeader ? '1' : '0'}>
+      <div class="hdr-in">
+        <a class="brand" href={href(lang)} aria-label="EURO.G Systems"><img src={asset('img/logo-light.png')} alt="EURO.G Systems" width="109" height="30" /></a>
+        <span class="chip">{t.meta.concept}</span>
+        <nav class="nav" id="nav" aria-label="Main">
+          {nav.map(([k, p]) => <a href={href(lang, p)} aria-current={page === p ? 'page' : undefined}>{t.nav[k]}</a>)}
+          <div class="dd">
+            <button type="button" class="dd-btn" aria-haspopup="true">{t.nav.paths} ▾</button>
+            <div class="dd-menu">
+              {paths.map(([k, p]) => <a href={href(lang, p)} aria-current={page === p ? 'page' : undefined}>{t.nav[k]}</a>)}
+            </div>
+          </div>
+        </nav>
+        <div class="hdr-r">
+          <div class="lang" role="group" aria-label={t.nav.language}>
+            {LANGS.map((l) => <a href={href(l, page)} hreflang={l} lang={l} aria-current={l === lang ? 'true' : undefined}>{LANG_LABEL[l]}</a>)}
+          </div>
+          <button type="button" class="basket-btn" id="basketBtn" aria-label={t.nav.basket}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 7z" /><path d="M9 7V5.5A2.5 2.5 0 0 1 11.5 3h1A2.5 2.5 0 0 1 15 5.5V7" /></svg>
+            <b id="basketN">0</b>
+          </button>
+          <a class="btn btn-light sm" href={href(lang, 'quote')}>{t.nav.quote}</a>
+          <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">{t.nav.menu}</button>
+        </div>
+      </div>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="foot">
+      <div class="wrap">
+        <div class="foot-grid">
+          <div>
+            <img class="foot-logo" src={asset('img/logo-light.png')} alt="EURO.G Systems" width="124" height="34" />
+            <p style="max-width:42ch">{t.footer.tag}</p>
+          </div>
+          <div><h4>{t.footer.explore}</h4><ul>{nav.map(([k, p]) => <li><a href={href(lang, p)}>{t.nav[k]}</a></li>)}<li><a href={href(lang, 'quote')}>{t.nav.quote}</a></li></ul></div>
+          <div><h4>{t.footer.audiences}</h4><ul>{paths.map(([k, p]) => <li><a href={href(lang, p)}>{t.nav[k]}</a></li>)}</ul></div>
+          <div><h4>{t.footer.contact}</h4><ul><li>{t.footer.address}</li><li class="mono">+374 44 77 00 30</li><li class="mono">eurogsystems@gmail.com</li></ul></div>
+        </div>
+        <div class="foot-note">
+          <p><span class="chip">{t.meta.concept}</span></p>
+          <p>{t.footer.disclaimer}</p>
+          <p>{t.footer.placeholder} {t.footer.rights}</p>
+        </div>
+      </div>
+    </footer>
+    <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label={t.nav.basket}>
+      <div class="drawer-bg"></div>
+      <div class="drawer-in">
+        <div class="drawer-head"><h3>{t.cfg.basketTitle}</h3><button class="x-btn" id="drawerClose" aria-label={t.nav.close}>×</button></div>
+        <div id="drawerList"></div>
+        <div style="display:flex;justify-content:space-between;font-weight:700"><span>{t.cfg.total}</span><span id="drawerTotal" class="num"></span></div>
+        <a class="btn btn-ink" href={href(lang, 'quote')}>{t.cfg.goQuote}</a>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="application/json" id="site-i18n" set:html={JSON.stringify(siteI18n)} />
+    <script>import '../scripts/site';</script>
+  </body>
+</html>

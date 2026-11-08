@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import PathHero from '../../components/PathHero.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang]; const p = t.paths.home;
+const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+---
+<Base lang={lang} page="homeowners">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+  <PathHero eye={p.eye} title={p.title} lead={p.lead} img={asset('img/site/project-1.jpg')} alt={p.title}>
+    <a class="btn btn-light" href={href(lang, 'configurator')}>{t.common.openConfigurator}</a>
+    <a class="btn btn-line" href={href(lang, 'quote')}>{t.common.requestQuote}</a>
+  </PathHero>
+  <section class="band">
+    <div class="wrap">
+      <div class="grid g4">
+        {p.steps.map((s, i) => <div class="card reveal" style={`transition-delay:${i * 80}ms`}><span class="mono" style="color:var(--accent);font-size:12px;letter-spacing:.12em">{String(i + 1).padStart(2, '0')}</span><h3 style="margin-top:10px">{s.t}</h3><p>{s.p}</p></div>)}
+      </div>
+    </div>
+  </section>
+  <section class="band white">
+    <div class="wrap faq">
+      <h2>{p.faqTitle}</h2>
+      <div>{p.faq.map((f) => <details><summary>{f.q}</summary><p>{f.a}</p></details>)}</div>
+    </div>
+  </section>
+  <style is:global>
+    .faq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: clamp(24px, 5vw, 80px); }
+    @media (max-width: 860px) { .faq { grid-template-columns: minmax(0, 1fr); } }
+    details { border-top: 1px solid var(--line); padding: 18px 0; } details:last-child { border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; font-weight: 600; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+    summary::after { content: '+'; font-size: 24px; line-height: 1; color: var(--accent); } details[open] summary::after { content: '−'; }
+    details p { margin-top: 10px; color: var(--mut); max-width: 60ch; }
+  </style>
+</Base>

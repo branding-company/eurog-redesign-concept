@@ -1,0 +1,159 @@
+---
+import Base from '../../layouts/Base.astro';
+import Opening from '../../components/Opening.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+import { SYSTEMS, sysById } from '../../data/systems';
+import { PROJECTS, outlinePath, project, MAP_W, MAP_H } from '../../data/projects';
+import { CITIES } from '../../data/pricing';
+import { sectionSvg } from '../../lib/sectionSvg';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const h = t.home;
+const audImgs: Record<string, string> = { homeowners: 'img/site/project-1.jpg', architects: 'img/site/architectural.jpg', developers: 'img/site/pro-2.jpg', dealers: 'img/site/pro-3.jpg' };
+const featured = ['pvc70', 'alrox65', 'alrox500'].map((id) => sysById(id));
+const prodImgs = [1, 2, 3, 4, 5, 6].map((n) => asset(`img/site/prod-${n}.jpg`));
+const json = { lang, cfg: t.cfg, sav: t.sav, common: t.common, cities: CITIES.map((c) => ({ id: c.id, name: c.names[lang] })), cfgHref: href(lang, 'configurator'), savHref: href(lang, 'savings') };
+---
+<Base lang={lang} page="" solidHeader={false}>
+  <Opening lang={lang} />
+
+  <section class="band tight dark home-stats" aria-label={h.stats.map((s) => s.l).join(', ')}>
+    <div class="wrap">
+      <div class="grid g4">
+        {h.stats.map((s) => (
+          <div class="stat reveal"><b><span data-count={s.n}>{s.n}</span>{s.s}</b><span>{s.l}</span></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head"><div><p class="eye">{h.audienceEye}</p><h2>{h.audienceTitle}</h2></div></div>
+      <div class="aud-tabs" role="tablist" id="audTabs">
+        {h.audiences.map((a, i) => <button type="button" role="tab" id={`tab-${a.id}`} aria-controls={`pan-${a.id}`} aria-selected={i === 0} data-i={i}>{a.t}</button>)}
+      </div>
+      {h.audiences.map((a, i) => (
+        <div class="aud-pan" role="tabpanel" id={`pan-${a.id}`} aria-labelledby={`tab-${a.id}`} hidden={i !== 0}>
+          <div class="photo aud-ph"><img src={asset(audImgs[a.id])} alt={a.t} width="900" height="700" loading="lazy" /></div>
+          <div class="aud-tx"><h3>{a.c}</h3><p>{a.p}</p><a class="btn btn-ink" href={href(lang, a.id)}>{t.common.learn}</a></div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="head"><div><p class="eye">{h.sysEye}</p><h2>{h.sysTitle}</h2><p class="lede">{h.sysLead}</p></div><a class="btn btn-line" href={href(lang, 'systems')}>{h.sysCta}</a></div>
+      <div class="grid g3">
+        {featured.map((x, i) => (
+          <a class="card home-sys reveal" href={`${href(lang, 'systems')}`} style={`transition-delay:${i * 90}ms`}>
+            <div class="home-sys-fig dark">{x.img ? <img src={asset(x.img)} alt={x.name} loading="lazy" width="640" height="520" /> : <Fragment set:html={sectionSvg(x, { dark: true })} />}</div>
+            <h3>{x.name}</h3><p>{x.blurb[lang]}</p>
+            <span class="mono home-sys-k">{x.depth} {t.common.mm} · {x.chambers} {t.sys.rows.chambers.toLowerCase()} · Uw {x.uwDouble.toFixed(1)}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="cfgTeaser">
+    <div class="wrap tz">
+      <div>
+        <p class="eye">{h.cfgEye}</p><h2>{h.cfgTitle}</h2><p class="lede">{h.cfgLead}</p>
+        <div class="tz-ctl">
+          <div class="field"><label for="tzW">{h.cfgW}: <output id="tzWo">1200</output> {t.common.mm}</label><input type="range" id="tzW" min="600" max="2400" step="50" value="1200" /></div>
+          <div class="field"><label for="tzH">{h.cfgH}: <output id="tzHo">1400</output> {t.common.mm}</label><input type="range" id="tzH" min="600" max="2400" step="50" value="1400" /></div>
+          <div class="seg" id="tzSash" role="group"><button type="button" data-n="1" aria-pressed="false">1</button><button type="button" data-n="2" aria-pressed="true">2</button><button type="button" data-n="3" aria-pressed="false">3</button></div>
+        </div>
+        <div class="tz-price"><span>{t.cfg.estimate}</span><b id="tzPrice"></b><small>{t.common.amd} · {t.cfg.incl}</small></div>
+        <a class="btn btn-light" style="margin-top:24px" id="tzGo" href={href(lang, 'configurator')}>{h.cfgCta}</a>
+      </div>
+      <div class="tz-stage"><svg id="tzSvg" viewBox="0 0 600 560" role="img" aria-label={t.cfg.title}></svg></div>
+    </div>
+  </section>
+
+  <section class="band" id="savTeaser">
+    <div class="wrap tz tz-rev">
+      <div class="card sav-card">
+        <div class="field"><label for="hsArea">{t.sav.area}: <output id="hsAo">18</output></label><input type="range" id="hsArea" min="4" max="80" value="18" /></div>
+        <div class="field"><label for="hsCity">{t.sav.city}</label><select class="select" id="hsCity">{CITIES.map((c) => <option value={c.id}>{c.names[lang]}</option>)}</select></div>
+        <div class="sav-line"><span>{t.sav.before}</span><b id="hsOld"></b></div>
+        <div class="sav-line"><span>{t.sav.after}</span><b id="hsNew"></b></div>
+        <div class="sav-line sav-save"><span>{t.sav.saving}</span><b id="hsSave"></b></div>
+        <p class="sample-line" style="color:var(--mut);font-size:12.5px">{t.common.amd} {t.common.perYear} · {t.common.sampleNote}</p>
+      </div>
+      <div>
+        <p class="eye">{h.savEye}</p><h2>{h.savTitle}</h2><p class="lede">{h.savLead}</p>
+        <a class="btn btn-ink" style="margin-top:24px" href={href(lang, 'savings')}>{h.savCta}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark">
+    <div class="wrap tz">
+      <div>
+        <p class="eye">{h.mapEye}</p><h2>{h.mapTitle}</h2><p class="lede">{h.mapLead}</p>
+        <a class="btn btn-light" style="margin-top:24px" href={href(lang, 'projects')}>{h.mapCta}</a>
+      </div>
+      <a class="map-mini" href={href(lang, 'projects')} aria-label={h.mapTitle}>
+        <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} aria-hidden="true">
+          <path d={outlinePath()} fill="#1d2430" stroke="#4a5568" stroke-width="1.5" stroke-linejoin="round" />
+          {PROJECTS.map((x, i) => { const [cx, cy] = project(x.lon, x.lat); return <g transform={`translate(${cx} ${cy})`}><circle r="9" class="mm-ring" style={`animation-delay:${(i % 7) * 0.35}s`} /><circle r="4.5" fill="#6fc9da" /></g>; })}
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="head"><div><p class="eye">{h.prodEye}</p><h2>{h.prodTitle}</h2><p class="lede">{h.prodLead}</p></div><a class="btn btn-line" href={href(lang, 'production')}>{h.prodCta}</a></div>
+      <div class="strip">
+        {prodImgs.map((src, i) => <figure class="reveal" style={`transition-delay:${i * 70}ms`}><div class="photo" style="aspect-ratio:4/3"><img src={src} alt={t.prod.stages[i].t} loading="lazy" width="800" height="600" /></div><figcaption><span class="mono">{String(i + 1).padStart(2, '0')}</span> {t.prod.stages[i].t}</figcaption></figure>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="band quote-cta dark" style={`--bg:url(${asset('img/site/quote-bg.jpg')})`}>
+    <div class="wrap">
+      <p class="eye">{h.quoteEye}</p><h2 style="max-width:18em">{h.quoteTitle}</h2><p class="lede">{h.quoteLead}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:28px"><a class="btn btn-light" href={href(lang, 'quote')}>{h.quoteCta}</a><a class="btn btn-line" href={href(lang, 'configurator')}>{t.common.openConfigurator}</a></div>
+    </div>
+  </section>
+
+  <script type="application/json" id="i18n" set:html={JSON.stringify(json)} />
+  <script>import '../../scripts/home';</script>
+</Base>
+<style is:global>
+  .home-stats { padding-block: 40px; border-top: 1px solid var(--stage-line); }
+  .stat b { font-family: var(--f-display); font-size: clamp(38px, 5vw, 64px); line-height: 1; display: block; font-variant-numeric: tabular-nums; color: #fff; }
+  .stat > span { display: block; margin-top: 8px; color: var(--stage-mut); font-size: 14px; max-width: 22ch; }
+  .aud-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .aud-tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 9px 18px; font-weight: 600; font-size: 14.5px; }
+  .aud-tabs button[aria-selected='true'] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .aud-pan { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: center; }
+  .aud-pan[hidden] { display: none; }
+  @media (max-width: 860px) { .aud-pan { grid-template-columns: minmax(0, 1fr); } }
+  .aud-ph { aspect-ratio: 16 / 11; } .aud-tx { display: grid; gap: 14px; justify-items: start; } .aud-tx h3 { font-size: clamp(24px, 3vw, 36px); } .aud-tx p { color: var(--mut); font-size: 18px; max-width: 40ch; }
+  .home-sys { display: flex; flex-direction: column; gap: 6px; text-decoration: none; padding: 0; overflow: hidden; transition: transform .3s, box-shadow .3s; }
+  .home-sys:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(20, 22, 27, .12); }
+  .home-sys > :not(.home-sys-fig) { margin-inline: 22px; } .home-sys-k { margin-bottom: 22px !important; font-size: 12px; color: var(--accent); letter-spacing: .05em; }
+  .home-sys-fig { aspect-ratio: 4 / 3; background: var(--stage); display: grid; place-items: center; margin-bottom: 14px; overflow: hidden; }
+  .home-sys-fig img { width: 100%; height: 100%; object-fit: contain; background: #ecedef; } .home-sys-fig svg { width: 62%; height: auto; }
+  .tz { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 80px); align-items: center; }
+  @media (max-width: 860px) { .tz { grid-template-columns: minmax(0, 1fr); } .tz-rev > :first-child { order: 2; } }
+  .tz-ctl { display: grid; gap: 16px; margin-top: 28px; max-width: 460px; } .tz-ctl label { font-size: 14px; color: var(--stage-mut); } .tz-ctl output { color: #fff; font-family: var(--f-mono); }
+  .tz-price { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; } .tz-price span { width: 100%; font-size: 13px; color: var(--stage-mut); }
+  .tz-price b { font-family: var(--f-display); font-size: clamp(34px, 5vw, 56px); line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent-2); } .tz-price small { color: var(--stage-mut); }
+  .tz-stage { background: var(--stage-2); border: 1px solid var(--stage-line); border-radius: 14px; padding: 12px; } .tz-stage svg { display: block; width: 100%; height: auto; }
+  .sav-card { display: grid; gap: 18px; padding: clamp(20px, 3vw, 32px); }
+  .sav-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; } .sav-line span { color: var(--mut); } .sav-line b { font-family: var(--f-display); font-size: 24px; font-variant-numeric: tabular-nums; }
+  .sav-save b { font-size: clamp(30px, 4vw, 44px); color: var(--accent); }
+  .map-mini { display: block; background: var(--stage-2); border: 1px solid var(--stage-line); border-radius: 14px; padding: 16px; transition: border-color .3s; } .map-mini:hover { border-color: var(--accent-2); } .map-mini svg { display: block; width: 100%; height: auto; max-height: 520px; }
+  .mm-ring { fill: rgba(111, 201, 218, .2); stroke: #6fc9da; stroke-width: 1; transform-box: fill-box; transform-origin: center; animation: mmr 2.6s ease-out infinite; }
+  @keyframes mmr { 0% { transform: scale(.5); opacity: 1; } 100% { transform: scale(2.4); opacity: 0; } }
+  .strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; } .strip figcaption { margin-top: 10px; font-weight: 600; font-size: 15px; } .strip .mono { color: var(--accent); font-size: 12px; margin-right: 6px; }
+  .quote-cta { background: linear-gradient(90deg, rgba(20, 22, 27, .94), rgba(20, 22, 27, .7)), var(--bg) center / cover; }
+  @media (prefers-reduced-motion: reduce) { .mm-ring { animation: none; } }
+</style>

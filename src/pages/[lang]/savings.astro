@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, type Lang } from '../../lib/i18n';
+import { CITIES } from '../../data/pricing';
+import { SYSTEMS } from '../../data/systems';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const s = t.sav;
+const json = { sav: s, common: t.common, lang, quote: href(lang, 'quote'), cfg: href(lang, 'configurator'), cities: CITIES.map((c) => ({ id: c.id, name: c.names[lang] })), systems: SYSTEMS.filter((x) => x.family !== 'facade').map((x) => ({ id: x.id, name: x.name })), glazings: t.cfg.glazings };
+---
+<Base lang={lang} page="savings">
+  <section class="phero">
+    <div class="wrap"><p class="eye">{s.eye}</p><h1>{s.title}</h1><p class="lede">{s.lead}</p></div>
+  </section>
+  <section class="band tight">
+    <div class="wrap sav">
+      <form class="card sav-form" id="savForm" onsubmit="return false">
+        <div class="field"><label for="sCity">{s.city}</label><select class="select" id="sCity"></select></div>
+        <div class="field"><label for="sArea">{s.area}</label>
+          <div class="sav-range"><input type="range" id="sAreaR" min="4" max="120" step="1" value="18" aria-label={s.area} /><output id="sAreaO">18</output></div>
+          <small style="color:var(--mut)">{s.areaHint}</small></div>
+        <div class="field"><span class="lb">{s.old}</span><div class="chips" id="sOld"></div></div>
+        <div class="field"><label for="sSys">{s.neu}</label><select class="select" id="sSys"></select></div>
+        <div class="field"><span class="lb">{s.glazing}</span><div class="chips" id="sGl"></div></div>
+        <div class="field"><span class="lb">{s.fuel}</span><div class="chips" id="sFuel"></div></div>
+        <div class="field"><label for="sPrice">{s.price}</label><input class="input" type="number" id="sPrice" min="1" max="200" step="1" /></div>
+      </form>
+      <div class="sav-res">
+        <div class="price-card dark" style="gap:18px">
+          <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)">{s.result}</div>
+          <svg id="sChart" viewBox="0 0 520 160" role="img" aria-label={s.chartLabel}></svg>
+          <div class="sav-big"><span>{s.saving}</span><b id="rSave"></b><small>{t.common.amd} {t.common.perYear}</small></div>
+          <div class="sav-kpi">
+            <div><b id="rPct"></b><span>{s.percent}</span></div>
+            <div><b id="rPay"></b><span>{s.payback}</span></div>
+            <div><b id="rCo2"></b><span>{s.co2} · {s.co2u}</span></div>
+          </div>
+          <p class="sample-line" id="rNote">{s.paybackNote}</p>
+          <div class="price-act">
+            <button type="button" class="btn btn-light" id="sAdd">{s.addNote}</button>
+            <a class="btn btn-line sm" href={href(lang, 'quote')}>{s.cta}</a>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px"><h3>{s.assume}</h3>
+          <ul class="sav-as"><li>{s.a1}</li><li>{s.a2}</li><li>{s.a3}</li><li>{s.a4}</li></ul></div>
+      </div>
+    </div>
+  </section>
+  <script type="application/json" id="i18n" set:html={JSON.stringify(json)} />
+  <script>import '../../scripts/savings';</script>
+</Base>
+<style is:global>
+  .sav { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .sav { grid-template-columns: minmax(0, 1fr); } }
+  .sav-form { display: grid; gap: 22px; }
+  .sav-range { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 12px; align-items: center; }
+  .sav-range output { font-family: var(--f-mono); text-align: right; }
+  .sav-big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  .sav-big span { width: 100%; font-size: 14px; color: var(--stage-mut); }
+  .sav-big b { font-family: var(--f-display); font-size: clamp(38px, 6vw, 64px); line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent-2); }
+  .sav-big small { color: var(--stage-mut); font-size: 15px; }
+  .sav-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0 20px; }
+  .sav-kpi div { border-top: 1px solid var(--stage-line); padding: 12px 0; }
+  .sav-kpi b { display: block; font-family: var(--f-display); font-size: 26px; font-variant-numeric: tabular-nums; }
+  .sav-kpi span { font-size: 13px; color: var(--stage-mut); }
+  .sav-as { margin: 10px 0 0; padding-left: 18px; display: grid; gap: 8px; color: var(--mut); font-size: 14.5px; }
+  #sChart { width: 100%; height: auto; }
+</style>

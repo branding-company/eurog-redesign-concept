@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://branding-company.github.io/eurog-redesign-concept/sitemap-index.xml

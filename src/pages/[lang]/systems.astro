@@ -1,0 +1,118 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LANGS, dicts, href, asset, type Lang } from '../../lib/i18n';
+import { SYSTEMS } from '../../data/systems';
+import { sectionSvg } from '../../lib/sectionSvg';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang];
+const s = t.sys;
+const fams = ['all', 'pvc', 'alu', 'facade'] as const;
+const rows = ['depth', 'chambers', 'thermal', 'uf', 'uw', 'uw3', 'glazing', 'maxH', 'uses', 'price'] as const;
+const val = (x: (typeof SYSTEMS)[number], r: (typeof rows)[number]) => {
+  switch (r) {
+    case 'depth': return `${x.depth} ${t.common.mm}`;
+    case 'chambers': return String(x.chambers);
+    case 'thermal': return x.thermal ? t.common.yes : t.common.no;
+    case 'uf': return x.uf.toFixed(1);
+    case 'uw': return x.uwDouble.toFixed(1);
+    case 'uw3': return x.uw3 ? x.uw3.toFixed(1) : '–';
+    case 'glazing': return `${x.glazing[0]}–${x.glazing[1]} ${t.common.mm}`;
+    case 'maxH': return `${x.maxSash} ${t.common.mm}`;
+    case 'uses': return x.uses.map((u) => (s.useKeys as Record<string, string>)[u]).join(', ');
+    case 'price': return s.levels[x.level];
+  }
+};
+const numeric = { uf: x => x.uf, uw: x => x.uwDouble, uw3: x => x.uw3 ?? 99 } as Record<string, (x: (typeof SYSTEMS)[number]) => number>;
+---
+<Base lang={lang} page="systems">
+  <section class="phero">
+    <div class="wrap"><p class="eye">{s.eye}</p><h1>{s.title}</h1><p class="lede">{s.lead}</p></div>
+  </section>
+  <section class="band tight">
+    <div class="wrap">
+      <div class="head" style="margin-bottom:24px">
+        <div class="seg" role="group" aria-label={s.title} id="famTabs">
+          {fams.map((f, i) => <button type="button" data-f={f} aria-pressed={i === 0}>{s.families[f]}</button>)}
+        </div>
+        <span class="sample-tag">{t.common.sample}</span>
+      </div>
+      <div class="grid g3" id="sysGrid">
+        {SYSTEMS.map((x) => (
+          <article class="card sys-card" data-f={x.family}>
+            <div class="sys-fig dark">
+              {x.img ? <img src={asset(x.img)} alt={`${x.name} profile`} loading="lazy" width="640" height="520" /> : <Fragment set:html={sectionSvg(x, { dark: true })} />}
+            </div>
+            <div class="sys-top"><h3>{x.name}</h3><span class="mono sys-fam">{s.families[x.family]}</span></div>
+            <p>{x.blurb[lang]}</p>
+            <div class="sys-kpi">
+              <div><b>{x.depth}</b><span>{t.common.mm}</span></div>
+              <div><b>{x.chambers}</b><span>{s.rows.chambers}</span></div>
+              <div><b>{x.uwDouble.toFixed(1)}</b><span>Uw</span></div>
+            </div>
+            <div class="chips" style="margin-top:14px">{x.uses.map((u) => <span class="tag">{(s.useKeys as Record<string, string>)[u]}</span>)}</div>
+            <div class="sys-act">
+              <a class="btn btn-ink sm" href={`${href(lang, 'configurator')}?sys=${x.id}`}>{s.configure}</a>
+              <a class="btn btn-line sm" href={`${href(lang, 'systems')}sheet/${x.id}/`}>{s.sheet}</a>
+            </div>
+          </article>
+        ))}
+      </div>
+      <p style="margin-top:20px;color:var(--mut)">{s.krauss}</p>
+    </div>
+  </section>
+  <section class="band white" id="compare">
+    <div class="wrap">
+      <div class="head"><div><p class="eye">{s.compare}</p><h2>{s.table}</h2><p class="lede">{s.maxCompare}</p></div></div>
+      <div class="chips" id="cmpPick" style="margin-bottom:20px">
+        {SYSTEMS.map((x, i) => <button type="button" class="pill" data-id={x.id} aria-pressed={['pvc70', 'pvc82', 'alrox65', 'alrox500'].includes(x.id)}>{x.name}</button>)}
+        <span class="mono" style="font-size:12px;color:var(--mut);align-self:center" id="cmpCount"></span>
+      </div>
+      <div class="tbl-wrap">
+        <table class="cmp" id="cmpTable">
+          <thead><tr><th></th>{SYSTEMS.map((x) => <th data-id={x.id}>{x.name}</th>)}</tr></thead>
+          <tbody>
+            <tr class="cmp-fig"><th>{s.drawing}</th>{SYSTEMS.map((x) => <td data-id={x.id}><div class="cmp-svg" set:html={sectionSvg(x)} /></td>)}</tr>
+            {rows.map((r) => (
+              <tr data-row={r}>
+                <th>{s.rows[r]}{['uf', 'uw', 'uw3'].includes(r) ? <small> ({s.units.w})</small> : null}</th>
+                {SYSTEMS.map((x) => <td data-id={x.id} data-v={numeric[r] ? numeric[r](x) : ''}>{val(x, r)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="sample-line" style="color:var(--mut);margin-top:12px">{t.common.sampleNote}</p>
+      <div class="card" style="margin-top:36px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+        <div style="min-width:0;flex:1 1 320px"><h3>{s.pick}</h3></div>
+        <a class="btn btn-ink" href={href(lang, 'quote')}>{s.pickCta}</a>
+      </div>
+    </div>
+  </section>
+  <script>import '../../scripts/systems';</script>
+</Base>
+<style is:global>
+  .sys-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+  .sys-card > :not(.sys-fig) { margin-left: 22px; margin-right: 22px; }
+  .sys-fig { aspect-ratio: 4 / 3; background: var(--stage); display: grid; place-items: center; overflow: hidden; margin-bottom: 18px; }
+  .sys-fig img { width: 100%; height: 100%; object-fit: contain; background: #ecedef; }
+  .sys-fig svg { width: 70%; height: auto; }
+  .sys-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .sys-fam { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .sys-kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 10px; margin-top: 16px; }
+  .sys-kpi div { border-top: 1px solid var(--line); padding-top: 8px; }
+  .sys-kpi b { font-family: var(--f-display); font-size: 24px; display: block; font-variant-numeric: tabular-nums; }
+  .sys-kpi span { font-size: 12px; color: var(--mut); }
+  .sys-act { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 18px 22px; margin-top: auto; padding-top: 18px; }
+  .tag { font-size: 12.5px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--mut); }
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table.cmp { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+  table.cmp th, table.cmp td { padding: 12px 14px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.cmp thead th { border-top: 0; font-family: var(--f-display); font-size: 18px; background: var(--paper); position: sticky; top: 0; }
+  table.cmp tbody th { font-family: var(--f-mono); font-weight: 400; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--mut); white-space: nowrap; }
+  table.cmp small { text-transform: none; letter-spacing: 0; }
+  table.cmp td.best { color: var(--ok); font-weight: 700; }
+  table.cmp .hide { display: none; }
+  .cmp-svg svg { width: 120px; height: auto; display: block; }
+  .cmp-fig td { background: var(--paper); }
+</style>

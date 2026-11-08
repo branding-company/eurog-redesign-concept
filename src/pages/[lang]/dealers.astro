@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import PathHero from '../../components/PathHero.astro';
+import { LANGS, dicts, asset, type Lang } from '../../lib/i18n';
+export function getStaticPaths() { return LANGS.map((lang) => ({ params: { lang } })); }
+const lang = Astro.params.lang as Lang;
+const t = dicts[lang]; const p = t.paths.deal;
+---
+<Base lang={lang} page="dealers">
+  <PathHero eye={p.eye} title={p.title} lead={p.lead} img={asset('img/site/pro-3.jpg')} alt={p.title}>
+    <a class="btn btn-light" href="#apply">{p.send}</a>
+  </PathHero>
+  <section class="band">
+    <div class="wrap">
+      <div class="head"><div><h2>{p.tiersTitle}</h2></div><span class="sample-tag">{t.common.sample}</span></div>
+      <div class="grid g3 tiers">
+        {p.tiers.map((x, i) => (
+          <article class={`card tier reveal ${x.hot ? 'hot' : ''}`} style={`transition-delay:${i * 80}ms`}>
+            <span class="mono tier-n">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{x.n}</h3><p>{x.p}</p>
+            <ul>{x.f.map((f) => <li>{f}</li>)}</ul>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="band white">
+    <div class="wrap">
+      <div class="head"><div><h2>{p.stepsTitle}</h2></div></div>
+      <ol class="proc2">{p.steps.map((s, i) => <li class="reveal" style={`transition-delay:${i * 90}ms`}><span class="mono">{String(i + 1).padStart(2, '0')}</span><b>{s}</b></li>)}</ol>
+    </div>
+  </section>
+  <section class="band" id="apply">
+    <div class="wrap deal">
+      <div><h2>{p.formTitle}</h2><p class="lede">{p.lead}</p></div>
+      <form class="card deal-form" id="dealForm" novalidate onsubmit="return false">
+        <div class="field"><label for="dCompany">{p.company}</label><input class="input" id="dCompany" required></div>
+        <div class="field"><label for="dName">{p.name}</label><input class="input" id="dName" required autocomplete="name"></div>
+        <div class="row2f"><div class="field"><label for="dPhone">{p.phone}</label><input class="input" id="dPhone" type="tel" required autocomplete="tel"></div>
+        <div class="field"><label for="dEmail">{p.email}</label><input class="input" id="dEmail" type="email" autocomplete="email"></div></div>
+        <div class="field"><label for="dCity">{p.city}</label><input class="input" id="dCity"></div>
+        <div class="field"><label for="dAbout">{p.about}</label><textarea class="textarea" id="dAbout"></textarea></div>
+        <button type="submit" class="btn btn-ink" id="dSend">{p.send}</button>
+      </form>
+      <div class="card deal-ok" id="dealOk" hidden><h3>{p.sentTitle}</h3><p>{p.sentBody}</p></div>
+    </div>
+  </section>
+  <script define:vars={{ req: p.required }}>
+    const f = document.getElementById('dealForm');
+    f.addEventListener('submit', (e) => {
+      e.preventDefault(); let ok = true;
+      f.querySelectorAll('[required]').forEach((i) => { const bad = !i.value.trim(); i.classList.toggle('bad', bad); const n = i.parentElement.querySelector('.err'); if (n) n.remove(); if (bad) { ok = false; i.parentElement.insertAdjacentHTML('beforeend', '<span class="err">' + req + '</span>'); } });
+      if (!ok) return;
+      try { const a = JSON.parse(localStorage.getItem('eurog-dealer-apps') || '[]'); a.push({ at: new Date().toISOString(), company: document.getElementById('dCompany').value }); localStorage.setItem('eurog-dealer-apps', JSON.stringify(a)); } catch (e2) {}
+      f.hidden = true; document.getElementById('dealOk').hidden = false;
+    });
+  </script>
+  <style is:global>
+    .tiers { align-items: stretch; }
+    .tier { display: grid; gap: 10px; align-content: start; } .tier.hot { background: var(--ink); color: #fff; border-color: var(--ink); color-scheme: dark; } .tier.hot p { color: var(--stage-mut); }
+    .tier-n { font-size: 12px; letter-spacing: .12em; color: var(--accent); } .tier.hot .tier-n { color: var(--accent-2); }
+    .tier ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 0; } .tier li { border-top: 1px solid var(--line); padding: 10px 0; font-size: 14.5px; } .tier.hot li { border-color: var(--stage-line); }
+    .proc2 { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 24px; }
+    .proc2 li { border-top: 2px solid var(--ink); padding-top: 14px; display: grid; gap: 8px; } .proc2 .mono { font-size: 12px; color: var(--accent); letter-spacing: .12em; } .proc2 b { font-family: var(--f-display); font-size: 20px; }
+    .deal { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+    @media (max-width: 860px) { .deal { grid-template-columns: minmax(0, 1fr); } }
+    .deal-form { display: grid; gap: 16px; } .row2f { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 14px; }
+  </style>
+</Base>

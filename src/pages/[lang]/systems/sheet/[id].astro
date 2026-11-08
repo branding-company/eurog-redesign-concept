@@ -1,0 +1,58 @@
+---
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+import '@fontsource/ibm-plex-sans/cyrillic-400.css';
+import '@fontsource/ibm-plex-sans/cyrillic-600.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/noto-sans-armenian/armenian-400.css';
+import '@fontsource/noto-sans-armenian/armenian-700.css';
+import { LANGS, dicts, href, asset, type Lang } from '../../../../lib/i18n';
+import { SYSTEMS } from '../../../../data/systems';
+import { sectionSvg } from '../../../../lib/sectionSvg';
+export function getStaticPaths() { return LANGS.flatMap((lang) => SYSTEMS.map((s) => ({ params: { lang, id: s.id } }))); }
+const lang = Astro.params.lang as Lang;
+const id = Astro.params.id as string;
+const x = SYSTEMS.find((s) => s.id === id)!;
+const t = dicts[lang]; const s = t.sys; const a = t.paths.arch;
+const rows: [string, string][] = [
+  [s.rows.depth, `${x.depth} ${t.common.mm}`], [s.rows.chambers, String(x.chambers)], [s.rows.thermal, x.thermal ? t.common.yes : t.common.no],
+  [`${s.rows.uf} (${s.units.w})`, x.uf.toFixed(1)], [`${s.rows.uw} (${s.units.w})`, x.uwDouble.toFixed(1)], [`${s.rows.uw3} (${s.units.w})`, x.uw3 ? x.uw3.toFixed(1) : '–'],
+  [s.rows.glazing, `${x.glazing[0]}–${x.glazing[1]} ${t.common.mm}`], [s.rows.maxH, `${x.maxSash} ${t.common.mm}`], [s.rows.uses, x.uses.map((u) => (s.useKeys as Record<string, string>)[u]).join(', ')],
+];
+---
+<!doctype html>
+<html lang={t.meta.htmlLang}>
+  <head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{a.sheet}: {x.name} · EURO.G Systems</title>
+  </head>
+  <body>
+    <div class="sheet">
+      <header><img src={asset('img/logo-dark.png')} alt="EURO.G Systems" width="150" height="41" /><div class="r"><b>{a.sheet}</b><span>{t.meta.concept}</span></div></header>
+      <h1>{x.name}</h1>
+      <p class="fam">{s.families[x.family]} · {x.depth} {t.common.mm}</p>
+      <p class="blurb">{x.blurb[lang]}</p>
+      <div class="fig" set:html={sectionSvg(x)} />
+      <table><tbody>{rows.map(([k, v]) => <tr><th>{k}</th><td>{v}</td></tr>)}</tbody></table>
+      <p class="spec"><b>{a.specTitle}.</b> {a.specBody.replace('{system}', x.name)}</p>
+      <footer><span>{t.footer.address} · +374 44 77 00 30 · eurogsystems@gmail.com</span><span>{t.common.sampleNote}</span></footer>
+    </div>
+    <style is:global>
+      @page { size: A4; margin: 0; }
+      html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { margin: 0; background: #e8eaed; font-family: 'IBM Plex Sans', 'Noto Sans Armenian', sans-serif; color: #1a1d24; }
+      .sheet { width: 210mm; height: 296mm; overflow: hidden; margin: 0 auto; background: #fff; padding: 14mm 18mm 12mm; box-sizing: border-box; display: flex; flex-direction: column; gap: 4mm; }
+      header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1.5px solid #1a1d24; padding-bottom: 5mm; }
+      header img { height: 11mm; width: auto; } header .r { text-align: right; font-size: 10pt; display: grid; gap: 1mm; } header .r span { font-family: 'IBM Plex Mono', monospace; font-size: 8pt; color: #5a606b; text-transform: uppercase; letter-spacing: .08em; }
+      h1 { font-size: 34pt; margin: 4mm 0 0; line-height: 1; font-weight: 600; } .fam { margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9pt; letter-spacing: .1em; text-transform: uppercase; color: #0b7a8c; }
+      .blurb { margin: 0; font-size: 12pt; max-width: 130mm; line-height: 1.5; color: #3a404c; }
+      .fig { background: #f4f5f6; border-radius: 3mm; padding: 4mm; display: grid; place-items: center; } .fig svg { width: 76mm; height: auto; }
+      table { border-collapse: collapse; width: 100%; font-size: 10.5pt; } th, td { text-align: left; padding: 2mm 0; border-top: 1px solid #d8dbe0; vertical-align: top; } th { width: 62%; font-weight: 400; color: #5a606b; padding-right: 6mm; } td { font-weight: 600; font-variant-numeric: tabular-nums; }
+      .spec { font-size: 9.5pt; line-height: 1.5; color: #3a404c; margin: 2mm 0 0; }
+      footer { margin-top: auto; border-top: 1px solid #d8dbe0; padding-top: 3mm; font-size: 8pt; color: #5a606b; display: grid; gap: 1mm; font-family: 'IBM Plex Mono', monospace; }
+      @media screen { .sheet { margin: 12px auto; box-shadow: 0 8px 30px rgba(0, 0, 0, .12); max-width: calc(100% - 24px); } }
+      @media print { body { background: #fff; } .sheet { margin: 0; } }
+    </style>
+  </body>
+</html>
